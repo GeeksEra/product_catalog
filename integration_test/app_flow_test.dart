@@ -98,6 +98,12 @@ void main() {
     await wait(tester);
     await screenshot('05_search');
 
+    // A search with no results shows the empty state.
+    await tester.enterText(find.byType(EditableText), 'zzqxv');
+    await pumpUntil(tester, find.text('No products found'));
+    await wait(tester, const Duration(milliseconds: 800));
+    await screenshot('06_search_empty');
+
     await tester.tap(find.text('Cancel'));
     await wait(tester, const Duration(milliseconds: 800));
     expect(find.text('Cancel'), findsNothing);
@@ -106,13 +112,13 @@ void main() {
     await tester.tap(find.text('Furniture'));
     await pumpUntil(tester, find.textContaining('Bed'));
     await wait(tester);
-    await screenshot('06_category');
+    await screenshot('07_category');
 
     // Detail: the gallery, then the collapsed bar over reviews and QR code.
     await tester.tap(find.byType(ProductCard).first);
     await pumpUntil(tester, find.byType(ReviewTile));
     await wait(tester);
-    await screenshot('07_detail');
+    await screenshot('08_detail');
 
     await tester.scrollUntilVisible(
       find.byType(QrCodeCard),
@@ -120,22 +126,30 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await wait(tester);
-    await screenshot('08_detail_reviews_qr');
+    await screenshot('09_detail_reviews_qr');
+
+    // Tapping a QR code shows it full screen for scanning.
+    await tester.tap(find.text('Generated'));
+    await pumpUntil(tester, find.text('Point a camera at the code to scan it'));
+    await wait(tester, const Duration(milliseconds: 800));
+    await screenshot('10_qr_fullscreen');
+    await tester.tap(find.byTooltip('Close'));
+    await wait(tester, const Duration(milliseconds: 800));
 
     await themeStore.setThemeMode(ThemeMode.dark);
     await wait(tester, const Duration(milliseconds: 1200));
-    await screenshot('09_detail_dark');
+    await screenshot('11_detail_dark');
     await themeStore.setThemeMode(ThemeMode.light);
 
     // Settings tab, then pick Dark from the appearance previews.
     await tester.tap(find.text('Settings'));
     await wait(tester, const Duration(milliseconds: 1200));
-    await screenshot('10_settings');
+    await screenshot('12_settings');
 
     await tester.tap(find.text('Dark'));
     await wait(tester, const Duration(milliseconds: 1200));
     expect(themeStore.themeMode, ThemeMode.dark);
-    await screenshot('11_settings_dark');
+    await screenshot('13_settings_dark');
 
     // Leave the simulator on the default setting.
     await themeStore.setThemeMode(ThemeMode.system);

@@ -14,7 +14,7 @@ String formatPrice(double price) {
   return '\$$grouped${fixed.substring(dot)}';
 }
 
-/// The price in the brand color.
+/// The price, in bold text color as noon.com shows it.
 class PriceText extends StatelessWidget {
   const PriceText({required this.price, this.large = false, super.key});
 
@@ -25,12 +25,14 @@ class PriceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = context.colors.primary;
+    final color = context.colors.text;
     return Text(
       formatPrice(price),
       style: large
           ? AppText.headingLarge(color: color)
-          : AppText.headingSmall(color: color),
+          : AppText.headingSmall(
+              color: color,
+            ).copyWith(fontWeight: AppText.bold),
     );
   }
 }

@@ -14,6 +14,7 @@ class FrostedSurface extends StatelessWidget {
     required this.child,
     this.showDivider = true,
     this.dividerEdge = VerticalDirection.down,
+    this.color,
     super.key,
   });
 
@@ -23,6 +24,10 @@ class FrostedSurface extends StatelessWidget {
   /// [VerticalDirection.down] puts the hairline at the bottom (navigation
   /// bars); [VerticalDirection.up] puts it at the top (tab bars).
   final VerticalDirection dividerEdge;
+
+  /// A solid fill instead of the translucent background, for bars that carry
+  /// the brand color.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +42,7 @@ class FrostedSurface extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          color: colors.background.withValues(alpha: 0.86),
+          color: color ?? colors.background.withValues(alpha: 0.86),
           // A foreground border takes no layout space, so the hairline never
           // pushes the bar's content.
           foregroundDecoration: BoxDecoration(

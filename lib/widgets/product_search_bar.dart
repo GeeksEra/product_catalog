@@ -70,7 +70,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
               style: AppText.bodyMedium(color: colors.text),
               placeholderStyle: AppText.bodyMedium(color: colors.textTertiary),
               itemColor: colors.textTertiary,
-              backgroundColor: colors.surfaceHighlight,
+              backgroundColor: colors.searchField,
               borderRadius: BorderRadius.circular(Dimens.radiusMedium - 2),
               cursorColor: colors.primary,
               prefixInsets: const EdgeInsetsDirectional.fromSTEB(10, 0, 4, 2),
@@ -87,7 +87,9 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                   onPressed: widget.onCancel,
                   child: Text(
                     'Cancel',
-                    style: AppText.bodyLarge(color: colors.primary),
+                    style: AppText.labelLarge(
+                      color: colors.onHeader,
+                    ).copyWith(fontSize: 16),
                   ),
                 )
               : const SizedBox(height: Dimens.searchFieldHeight),

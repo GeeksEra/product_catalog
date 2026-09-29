@@ -125,7 +125,7 @@ class PageDots extends StatelessWidget {
               width: i == current ? 16 : 6,
               height: 6,
               decoration: BoxDecoration(
-                color: i == current ? colors.primary : colors.borderSecondary,
+                color: i == current ? colors.text : colors.borderSecondary,
                 borderRadius: BorderRadius.circular(Dimens.radiusPill),
               ),
             ),

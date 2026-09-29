@@ -130,8 +130,8 @@ class DiscountTag extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: colors.primary,
-        borderRadius: BorderRadius.circular(Dimens.radiusPill),
+        color: colors.sale,
+        borderRadius: BorderRadius.circular(Dimens.radiusSmall - 4),
       ),
       child: Text(
         '-${percent.round()}%',

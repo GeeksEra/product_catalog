@@ -6,6 +6,7 @@ import 'package:product_catalog/config/service_locator.dart';
 import 'package:product_catalog/models/product.dart';
 import 'package:product_catalog/models/review.dart';
 import 'package:product_catalog/screens/image_viewer/image_viewer_screen.dart';
+import 'package:product_catalog/screens/qr_viewer/qr_viewer_screen.dart';
 import 'package:product_catalog/stores/product_detail_store.dart';
 import 'package:product_catalog/theme/app_colors.dart';
 import 'package:product_catalog/theme/app_text.dart';
@@ -75,6 +76,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
+
+  void _openQr(Product product, QrSource source) {
+    // The root navigator, so the viewer also covers the tab bar.
+    Navigator.of(context, rootNavigator: true).push(
+      PageRouteBuilder<void>(
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, _, _) => QrViewerScreen(
+          source: source,
+          data: _qrData(product),
+          url: product.meta?.qrCode,
+          productTitle: product.title,
+        ),
+        transitionsBuilder: (_, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
+  }
+
+  static String _qrData(Product product) =>
+      product.meta?.barcode ?? 'product:${product.id}';
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +199,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         product: product,
         reviews: _store.reviews,
         reviewsArePlaceholder: _store.reviewsArePlaceholder,
+        qrData: _qrData(product),
+        onOpenQr: (source) => _openQr(product, source),
       );
     }
     if (_store.error != null) {
@@ -323,7 +346,7 @@ class _FactsRow extends StatelessWidget {
                 value: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.star_rounded, size: 18, color: colors.warning),
+                    Icon(Icons.star_rounded, size: 18, color: colors.rating),
                     const SizedBox(width: Dimens.space2),
                     Text(
                       product.rating.toStringAsFixed(1),
@@ -432,12 +455,16 @@ class _LoadedBody extends StatelessWidget {
     required this.product,
     required this.reviews,
     required this.reviewsArePlaceholder,
+    required this.qrData,
+    required this.onOpenQr,
     super.key,
   });
 
   final Product product;
   final List<Review> reviews;
   final bool reviewsArePlaceholder;
+  final String qrData;
+  final ValueChanged<QrSource> onOpenQr;
 
   @override
   Widget build(BuildContext context) {
@@ -461,7 +488,8 @@ class _LoadedBody extends StatelessWidget {
         const SizedBox(height: Dimens.space12),
         QrCodeCard(
           qrCodeUrl: product.meta?.qrCode,
-          qrData: product.meta?.barcode ?? 'product:${product.id}',
+          qrData: qrData,
+          onOpen: onOpenQr,
         ),
       ],
     );

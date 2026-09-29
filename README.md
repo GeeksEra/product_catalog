@@ -7,7 +7,7 @@ A Flutter app that lists products from the [DummyJSON](https://dummyjson.com/doc
 **App shell**
 - A frosted bottom tab bar with **Products** and **Settings**. Each tab keeps its own navigation stack and scroll position, and the bar stays visible on the detail screen
 - Tapping the current tab again pops back to its first screen, then scrolls it to the top
-- Android back: goes back within the current tab, then returns to Products, then leaves the app
+- Android back (with Android 14 predictive back): closes the keyboard, cancels an active search, goes back within the current tab, then returns to Products, then leaves the app
 
 **Product list**
 - An iOS-style large title that folds into a compact bar as you scroll. The search field hides on scroll and settles fully open or closed when you let go
@@ -16,16 +16,16 @@ A Flutter app that lists products from the [DummyJSON](https://dummyjson.com/doc
 - Shows the title, brand (only when the product has one), a two-line description, price with discount, star rating, a stock badge and the thumbnail
 - Availability is derived from `stock`, as the brief asks: `stock > 0` shows "In Stock", otherwise "Out of Stock"
 - Infinite scroll using `limit` and `skip`, with **skeleton cards while the next page loads** and an end-of-list line ("That's all 194 products")
-- Pull to refresh: the iOS spinner on iPhone, the Material one on Android
+- Pull to refresh keeps the current list on screen until the new first page arrives, and says so if it fails: the iOS spinner on iPhone, the Material one on Android
 - Search with a 400 ms debounce and a result count, and a filter row with one chip per category
-- One column on phones, and a two- or three-column grid on tablets and in landscape
+- One column on phones, and a two- or three-column grid on tablets and in landscape. On short screens (a phone in landscape) the title sits in the compact bar, so the list keeps its room
 - Shimmer skeletons while loading, an error view with Retry, and an empty state for searches with no results
 
 **Product detail**
 - A full-bleed, swipeable gallery of all images that collapses into a titled bar as you scroll. Tap an image to open a full-screen viewer with pinch to zoom
 - Title, brand, category, price and savings, plus a row with rating, stock left and discount
 - Reviews with an overall rating summary (see [Decisions](#decisions-and-assumptions))
-- A QR code card: the `meta.qrCode` image from the API, plus a QR code generated on the device from the barcode
+- A QR code card: the `meta.qrCode` image from the API, plus a QR code generated on the device from the barcode. Tap either code to show it full screen on white, sized for scanning
 
 **Bonus**
 - ✅ Pagination: `limit` / `skip`
@@ -39,7 +39,7 @@ A Flutter app that lists products from the [DummyJSON](https://dummyjson.com/doc
 
 ## Demo
 
-A 50-second walkthrough recorded on the iPhone simulator against the live API: first load, the collapsing header, loading more, search, the category filter, the product detail with its gallery, and switching themes in Settings.
+A walkthrough recorded on the iPhone simulator against the live API: first load, the collapsing header, loading more, search and a search with no results, the category filter, the product detail with its gallery, the QR code full screen, and switching themes in Settings.
 
 <a href="docs/demo.mp4"><img src="docs/demo.gif" width="270" alt="Demo walkthrough of the app"></a>
 
@@ -51,17 +51,21 @@ A 50-second walkthrough recorded on the iPhone simulator against the live API: f
 |---|---|---|
 | ![List](docs/screenshots/01_list.png) | ![Scrolled](docs/screenshots/02_list_scrolled.png) | ![Load more](docs/screenshots/03_load_more.png) |
 
-| List (dark) | Search active | Category filter |
+| List (dark) | Search active | No results |
 |---|---|---|
-| ![List dark](docs/screenshots/04_list_dark.png) | ![Search](docs/screenshots/05_search.png) | ![Category](docs/screenshots/06_category.png) |
+| ![List dark](docs/screenshots/04_list_dark.png) | ![Search](docs/screenshots/05_search.png) | ![No results](docs/screenshots/06_search_empty.png) |
 
-| Detail | Reviews and QR code | Detail (dark) |
+| Category filter | Detail | Reviews and QR code |
 |---|---|---|
-| ![Detail](docs/screenshots/07_detail.png) | ![Reviews and QR](docs/screenshots/08_detail_reviews_qr.png) | ![Detail dark](docs/screenshots/09_detail_dark.png) |
+| ![Category](docs/screenshots/07_category.png) | ![Detail](docs/screenshots/08_detail.png) | ![Reviews and QR](docs/screenshots/09_detail_reviews_qr.png) |
 
-| Settings | Settings (dark) |
-|---|---|
-| ![Settings](docs/screenshots/10_settings.png) | ![Settings dark](docs/screenshots/11_settings_dark.png) |
+| QR code full screen | Detail (dark) | Settings |
+|---|---|---|
+| ![QR full screen](docs/screenshots/10_qr_fullscreen.png) | ![Detail dark](docs/screenshots/11_detail_dark.png) | ![Settings](docs/screenshots/12_settings.png) |
+
+| Settings (dark) |
+|---|
+| ![Settings dark](docs/screenshots/13_settings_dark.png) |
 
 The integration test captures these screenshots from the running app (see [Testing](#testing)).
 
@@ -125,7 +129,7 @@ A few details worth knowing:
 - **Stale responses are dropped.** Changing the search or the category starts a new request generation. A page that arrives from an older generation is ignored, so fast typing can't show results for an old query.
 - **The detail screen opens instantly.** It draws the header from the product it was given by the list, so the Hero image and the title appear at once. Only the reviews and QR section wait for the network.
 - **Tabs keep their state.** Each tab is its own `Navigator` inside an `IndexedStack`, with its own `HeroController` so the list-to-detail Hero still flies. Animations on the hidden tab are paused.
-- **Design tokens.** Every widget gets its colors from `AppColors`, a `ThemeExtension` with light and dark palettes, and its text styles from `AppText`. No raw hex values or `Colors.*` appear in widgets. The one exception is the black background behind the full-screen image viewer.
+- **Design tokens.** Every widget gets its colors from `AppColors`, a `ThemeExtension` with light and dark palettes, and its text styles from `AppText`. The palette is taken from noon.com: the yellow top bar (`#FEEE00`) with navy text, blue links (`#3866DF`), green ratings and in-stock labels (`#05AF25`) and coral deal tags (`#FE503C`). noon has no dark mode, so the dark palette keeps those accents on deep navy greys. No raw hex values or `Colors.*` appear in widgets. The one exception is the black background behind the full-screen image viewer.
 
 ## Testing
 
@@ -140,7 +144,8 @@ flutter test      # unit and widget tests
 | `test/services` | Query parameters and paths for every endpoint, and mapping of errors to typed exceptions (500, 404, invalid JSON, wrong field types, no connection, timeout). Uses `MockClient` from `package:http/testing.dart` |
 | `test/stores` | Pagination, the last page, errors, debounced search, search and category clearing each other, dropping stale responses, category retry, placeholder reviews, detail retry, saving the theme |
 | `test/widgets` | The product card renders every field, hides a missing brand, shows out of stock, handles taps, and fits a 320 px screen at 1.3× text size |
-| `test/screens` | Skeleton cards while the next page loads and the end-of-list line after it; re-tapping the selected chip scrolls to the top; focusing search shows Cancel, and Cancel ends the search |
+| `test/widgets/qr_code_card_test` | Tapping a code asks to open it; the full-screen viewer shows the code, product and barcode, and closes |
+| `test/screens` | Skeleton cards while the next page loads and the end-of-list line after it; re-tapping the selected chip scrolls to the top; focusing search shows Cancel, and Cancel ends the search; on Settings the app keeps the Android back gesture and back returns to Products |
 
 An end-to-end test runs the real app against the live API. It browses and scrolls the list, loads more, re-taps a chip, searches and cancels, filters by category, opens a product, scrolls to the QR code, and switches to Dark on the Settings tab, taking the screenshots above along the way:
 

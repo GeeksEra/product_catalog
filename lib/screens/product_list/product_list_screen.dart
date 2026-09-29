@@ -130,6 +130,7 @@ class _ProductListScreenState extends State<ProductListScreen>
     final titleEnd = LargeTitleHeader.collapseExtent(
       hasSearch: true,
       searchProgress: progress,
+      compact: LargeTitleHeader.isCompact(context),
     );
     final offset = _scroll.offset;
     double? target;
@@ -149,6 +150,17 @@ class _ProductListScreenState extends State<ProductListScreen>
       );
     }
     return false;
+  }
+
+  Future<void> _refresh() async {
+    try {
+      await _store.refresh();
+    } on Exception catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(describeError(error))));
+    }
   }
 
   void _openProduct(Product product) {
@@ -175,8 +187,11 @@ class _ProductListScreenState extends State<ProductListScreen>
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && _searchActive) _cancelSearch();
       },
-      child: Scaffold(
-        body: LayoutBuilder(
+      // Material, not Scaffold: snack bars then show once, on the app shell's
+      // Scaffold above the tab bar, instead of also behind it.
+      child: Material(
+        color: context.colors.background,
+        child: LayoutBuilder(
           builder: (context, constraints) {
             final columns = _columnsFor(constraints.maxWidth);
             final list = AnimatedBuilder(
@@ -209,9 +224,7 @@ class _ProductListScreenState extends State<ProductListScreen>
                           ),
                         ),
                         if (isIOS)
-                          CupertinoSliverRefreshControl(
-                            onRefresh: _store.refresh,
-                          ),
+                          CupertinoSliverRefreshControl(onRefresh: _refresh),
                         Observer(builder: (_) => _buildResultCount()),
                         SliverPadding(
                           padding: EdgeInsets.fromLTRB(
@@ -229,7 +242,7 @@ class _ProductListScreenState extends State<ProductListScreen>
 
             if (isIOS) return list;
             return RefreshIndicator(
-              onRefresh: _store.refresh,
+              onRefresh: _refresh,
               edgeOffset:
                   media.padding.top +
                   Dimens.navBarHeight +

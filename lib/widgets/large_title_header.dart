@@ -14,6 +14,9 @@ import 'package:product_catalog/widgets/frosted_surface.dart';
 /// `hidesSearchBarWhenScrolling`. While [searchProgress] runs from 0 to 1
 /// (the search field gaining focus), the compact bar and large title slide
 /// away and the search row pins itself to the top.
+///
+/// On short screens (a phone in landscape) there is no large title: the title
+/// sits in the compact bar, as UIKit does, so the list keeps its room.
 class LargeTitleHeader extends StatelessWidget {
   const LargeTitleHeader({
     required this.title,
@@ -35,6 +38,10 @@ class LargeTitleHeader extends StatelessWidget {
   /// Stays pinned below the bar, [Dimens.chipRowHeight] tall.
   final Widget? bottom;
 
+  /// Whether the screen is too short for a large title.
+  static bool isCompact(BuildContext context) =>
+      MediaQuery.sizeOf(context).height < 500;
+
   /// How far the list can scroll before the search row is fully hidden. Used
   /// by screens to snap a half-hidden header.
   static double searchCollapseExtent({
@@ -48,12 +55,14 @@ class LargeTitleHeader extends StatelessWidget {
   static double collapseExtent({
     required bool hasSearch,
     required double searchProgress,
+    required bool compact,
   }) {
+    final title = compact ? 0 : Dimens.largeTitleHeight * (1 - searchProgress);
     return searchCollapseExtent(
           hasSearch: hasSearch,
           searchProgress: searchProgress,
         ) +
-        Dimens.largeTitleHeight * (1 - searchProgress);
+        title;
   }
 
   @override
@@ -66,6 +75,7 @@ class LargeTitleHeader extends StatelessWidget {
         searchProgress: searchProgress.clamp(0, 1),
         bottom: bottom,
         topInset: MediaQuery.paddingOf(context).top,
+        compact: isCompact(context),
         colors: context.colors,
       ),
     );
@@ -79,6 +89,7 @@ class _LargeTitleDelegate extends SliverPersistentHeaderDelegate {
     required this.searchProgress,
     required this.bottom,
     required this.topInset,
+    required this.compact,
     required this.colors,
   });
 
@@ -87,11 +98,12 @@ class _LargeTitleDelegate extends SliverPersistentHeaderDelegate {
   final double searchProgress;
   final Widget? bottom;
   final double topInset;
+  final bool compact;
   final AppColors colors;
 
   double get _p => searchProgress;
   double get _navHeight => Dimens.navBarHeight * (1 - _p);
-  double get _titleHeight => Dimens.largeTitleHeight * (1 - _p);
+  double get _titleHeight => compact ? 0 : Dimens.largeTitleHeight * (1 - _p);
   double get _searchHeight => search == null ? 0 : Dimens.searchRowHeight;
   double get _bottomHeight => bottom == null ? 0 : Dimens.chipRowHeight;
 
@@ -123,6 +135,7 @@ class _LargeTitleDelegate extends SliverPersistentHeaderDelegate {
     final collapsed = shrinkOffset >= maxExtent - minExtent - 0.5;
 
     return FrostedSurface(
+      color: colors.header,
       showDivider: collapsed || overlaps,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,7 +175,7 @@ class _LargeTitleDelegate extends SliverPersistentHeaderDelegate {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.largeTitle(color: colors.text),
+                        style: AppText.largeTitle(color: colors.onHeader),
                       ),
                     ),
                   ),
@@ -210,6 +223,7 @@ class _LargeTitleDelegate extends SliverPersistentHeaderDelegate {
         old.searchProgress != searchProgress ||
         old.bottom != bottom ||
         old.topInset != topInset ||
+        old.compact != compact ||
         old.colors != colors;
   }
 }
@@ -233,7 +247,7 @@ class _CompactBar extends StatelessWidget {
             opacity: titleOpacity,
             child: Text(
               title,
-              style: AppText.navTitle(color: context.colors.text),
+              style: AppText.navTitle(color: context.colors.onHeader),
             ),
           ),
         ),

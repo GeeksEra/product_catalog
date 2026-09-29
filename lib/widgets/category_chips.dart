@@ -84,16 +84,18 @@ class FilterPill extends StatelessWidget {
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
-            color: selected ? colors.primary : colors.surface,
+            color: selected ? colors.chipSelected : colors.searchField,
             borderRadius: BorderRadius.circular(Dimens.radiusPill),
             border: Border.all(
-              color: selected ? colors.primary : colors.border,
+              color: selected
+                  ? colors.chipSelected
+                  : colors.onHeader.withValues(alpha: 0.08),
             ),
           ),
           child: Text(
             label,
             style: AppText.labelMedium(
-              color: selected ? colors.buttonPrimaryText : colors.textSecondary,
+              color: selected ? colors.onChipSelected : colors.textSecondary,
             ),
           ),
         ),

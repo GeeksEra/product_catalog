@@ -51,6 +51,9 @@ class _HomeShellState extends State<HomeShell> {
   final List<TabReselection> _reselections = [
     for (final _ in _tabs) TabReselection(),
   ];
+  final List<_TopRouteObserver> _topRoutes = [
+    for (final _ in _tabs) _TopRouteObserver(),
+  ];
 
   @override
   void dispose() {
@@ -63,9 +66,44 @@ class _HomeShellState extends State<HomeShell> {
     super.dispose();
   }
 
+  void _selectTab(int index) {
+    setState(() => _index = index);
+    // The new tab decides what back does now, so tell the platform again.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      NavigationNotification(
+        canHandlePop: _shellHandlesBack(_tabHandlesBack(_index)),
+      ).dispatch(context);
+    });
+  }
+
+  /// Whether the tab has something to go back to: a pushed screen, or a root
+  /// screen that is blocking pops (the list while search is active).
+  bool _tabHandlesBack(int index) {
+    final navigator = _navigatorKeys[index].currentState;
+    final top = _topRoutes[index].top;
+    return (navigator?.canPop() ?? false) ||
+        top?.popDisposition == RoutePopDisposition.doNotPop;
+  }
+
+  /// Off the first tab, back always stays in the app: it returns to Products.
+  bool _shellHandlesBack(bool tabHandlesBack) => tabHandlesBack || _index != 0;
+
+  /// With Android predictive back, each navigator tells the platform whether
+  /// the app wants the next back gesture. A tab's navigator only knows about
+  /// its own routes, so on the Settings tab it would report "no" and Android
+  /// would close the app. Correct the answer here, and ignore the hidden tab.
+  bool _onTabNavigation(int tab, NavigationNotification notification) {
+    if (tab != _index) return true;
+    final canHandlePop = _shellHandlesBack(notification.canHandlePop);
+    if (canHandlePop == notification.canHandlePop) return false;
+    NavigationNotification(canHandlePop: canHandlePop).dispatch(context);
+    return true;
+  }
+
   void _onTabTapped(int index) {
     if (index != _index) {
-      setState(() => _index = index);
+      _selectTab(index);
       return;
     }
     final navigator = _navigatorKeys[index].currentState;
@@ -87,7 +125,7 @@ class _HomeShellState extends State<HomeShell> {
     if (navigator != null && await navigator.maybePop()) return;
     if (!mounted) return;
     if (_index != 0) {
-      setState(() => _index = 0);
+      _selectTab(0);
     } else {
       await SystemNavigator.pop();
     }
@@ -102,11 +140,14 @@ class _HomeShellState extends State<HomeShell> {
     return TickerMode(
       // Pauses shimmer and other animations on the hidden tab.
       enabled: index == _index,
-      child: Navigator(
-        key: _navigatorKeys[index],
-        observers: [_heroControllers[index]],
-        onGenerateRoute: (settings) =>
-            MaterialPageRoute<void>(settings: settings, builder: (_) => root),
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (notification) => _onTabNavigation(index, notification),
+        child: Navigator(
+          key: _navigatorKeys[index],
+          observers: [_heroControllers[index], _topRoutes[index]],
+          onGenerateRoute: (settings) =>
+              MaterialPageRoute<void>(settings: settings, builder: (_) => root),
+        ),
       ),
     );
   }
@@ -129,5 +170,28 @@ class _HomeShellState extends State<HomeShell> {
         ),
       ),
     );
+  }
+}
+
+/// Remembers the route on top of a navigator, to read its pop disposition.
+class _TopRouteObserver extends NavigatorObserver {
+  Route<dynamic>? top;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      top = route;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      top = previousRoute;
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route == top) top = previousRoute;
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (oldRoute == top) top = newRoute;
   }
 }

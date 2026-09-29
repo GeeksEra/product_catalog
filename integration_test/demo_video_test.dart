@@ -94,6 +94,13 @@ void main() {
     await type(tester, 'phone');
     await pumpUntil(tester, find.textContaining('iPhone'));
     await hold(tester, 2200);
+
+    // A search with no results: the empty state.
+    await tester.enterText(find.byType(EditableText), '');
+    await hold(tester, 300);
+    await type(tester, 'zzqxv');
+    await pumpUntil(tester, find.text('No products found'));
+    await hold(tester, 2200);
     await tester.tap(find.text('Cancel'));
     await hold(tester, 1400);
 
@@ -132,7 +139,14 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).last,
     );
-    await hold(tester, 2000);
+    await hold(tester, 1500);
+
+    // Tap a QR code: it opens full screen for scanning.
+    await tester.tap(find.text('Generated'));
+    await pumpUntil(tester, find.text('Point a camera at the code to scan it'));
+    await hold(tester, 2200);
+    await tester.tap(find.byTooltip('Close'));
+    await hold(tester, 1000);
 
     // Back to the list.
     await tester.pageBack();

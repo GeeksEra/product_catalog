@@ -148,6 +148,44 @@ void main() {
     expect(store.paging.itemList, isNull);
   });
 
+  group('refresh', () {
+    test('keeps the products until the new first page arrives', () async {
+      stubProducts(createTestPage(skip: 0, count: 20, total: 194));
+      await requestPage(0);
+
+      final fresh = Completer<ProductPage>();
+      when(
+        () => service.getProducts(limit: 20, skip: 0),
+      ).thenAnswer((_) => fresh.future);
+      when(() => service.getCategories()).thenAnswer((_) async => const []);
+
+      final refreshing = store.refresh();
+      await pumpEventQueue();
+      expect(store.paging.itemList, hasLength(20));
+
+      fresh.complete(createTestPage(skip: 0, count: 5, total: 5));
+      await refreshing;
+
+      expect(store.paging.itemList, hasLength(5));
+      expect(store.paging.nextPageKey, isNull);
+      expect(store.totalCount, 5);
+    });
+
+    test('keeps the products and rethrows when it fails', () async {
+      stubProducts(createTestPage(skip: 0, count: 20, total: 194));
+      await requestPage(0);
+      when(
+        () => service.getProducts(limit: 20, skip: 0),
+      ).thenThrow(const NetworkException());
+      when(() => service.getCategories()).thenAnswer((_) async => const []);
+
+      await expectLater(store.refresh(), throwsA(isA<NetworkException>()));
+
+      expect(store.paging.itemList, hasLength(20));
+      expect(store.paging.error, isNull);
+    });
+  });
+
   group('categories', () {
     test('loads once and is not refetched after success', () async {
       when(() => service.getCategories()).thenAnswer(

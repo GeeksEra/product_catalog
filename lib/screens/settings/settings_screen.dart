@@ -299,7 +299,7 @@ class _MiniScreen extends StatelessWidget {
                 children: [
                   bar(0.9, palette.textSecondary, 3),
                   const SizedBox(height: 3),
-                  bar(0.5, palette.primary, 3),
+                  bar(0.5, palette.text, 3),
                 ],
               ),
             ),
@@ -310,20 +310,31 @@ class _MiniScreen extends StatelessWidget {
 
     return ColoredBox(
       color: palette.background,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(6, 10, 6, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            bar(0.6, palette.text, 6),
-            const SizedBox(height: 6),
-            bar(1, palette.surfaceHighlight, 8),
-            const SizedBox(height: 6),
-            card(),
-            const SizedBox(height: 4),
-            card(),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The header: title and search field on the header color.
+          ColoredBox(
+            color: palette.header,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(6, 10, 6, 6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  bar(0.6, palette.onHeader, 6),
+                  const SizedBox(height: 5),
+                  bar(1, palette.searchField, 8),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
+            child: Column(
+              children: [card(), const SizedBox(height: 4), card()],
+            ),
+          ),
+        ],
       ),
     );
   }

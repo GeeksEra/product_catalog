@@ -88,7 +88,7 @@ class _TabItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? colors.primary : colors.textTertiary;
+    final color = selected ? colors.text : colors.textTertiary;
     return Semantics(
       button: true,
       selected: selected,
@@ -102,17 +102,35 @@ class _TabItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 150),
-              child: Icon(
-                selected ? tab.selectedIcon : tab.icon,
-                key: ValueKey(selected),
-                color: color,
-                size: 26,
+            // A brand-yellow pill behind the active icon.
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              width: 56,
+              height: 30,
+              decoration: BoxDecoration(
+                color: selected
+                    ? colors.brand
+                    : colors.brand.withValues(alpha: 0),
+                borderRadius: BorderRadius.circular(Dimens.radiusPill),
+              ),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: Icon(
+                  selected ? tab.selectedIcon : tab.icon,
+                  key: ValueKey(selected),
+                  color: selected ? colors.onBrand : color,
+                  size: 22,
+                ),
               ),
             ),
             const SizedBox(height: Dimens.space2),
-            Text(tab.label, style: AppText.labelSmall(color: color)),
+            Text(
+              tab.label,
+              style: AppText.labelSmall(
+                color: color,
+              ).copyWith(fontWeight: selected ? AppText.semiBold : null),
+            ),
           ],
         ),
       ),

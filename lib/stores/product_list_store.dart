@@ -86,10 +86,34 @@ abstract class _ProductListStore with Store {
     _reload();
   }
 
-  /// For pull to refresh. Also retries categories if they failed to load.
+  /// Pull to refresh. Also retries categories if they failed to load.
+  ///
+  /// The current products stay on screen until the new first page arrives,
+  /// then replace it in one step, so the list never blanks out and the
+  /// refresh spinner stays up for the whole request. If that request fails
+  /// while products are showing, they stay and the [ApiException] is
+  /// rethrown for the screen to report. With nothing showing yet, this is a
+  /// plain reload.
   Future<void> refresh() async {
     loadCategories();
-    _reload();
+    _debounce?.cancel();
+    if (paging.itemList == null) {
+      _reload();
+      return;
+    }
+    final generation = ++_generation;
+    try {
+      final page = await _loadPage(0);
+      if (generation != _generation) return;
+      runInAction(() => totalCount = page.total);
+      paging.value = PagingState(
+        itemList: page.products,
+        nextPageKey: page.hasMore ? page.nextSkip : null,
+      );
+    } on Exception {
+      if (generation != _generation) return;
+      rethrow;
+    }
   }
 
   void _reload() {

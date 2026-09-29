@@ -32,36 +32,52 @@ class RatingStars extends StatelessWidget {
     final colors = context.colors;
     final halves = (rating.clamp(0, 5) * 2).round();
 
+    final Widget stars = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (compact)
+          Icon(Icons.star_rounded, size: size, color: colors.rating)
+        else
+          for (var star = 1; star <= 5; star++)
+            Icon(
+              halves >= star * 2
+                  ? Icons.star_rounded
+                  : halves == star * 2 - 1
+                  ? Icons.star_half_rounded
+                  : Icons.star_outline_rounded,
+              size: size,
+              color: colors.rating,
+            ),
+        if (showValue) ...[
+          SizedBox(width: compact ? Dimens.space2 : Dimens.space4),
+          Text(
+            rating.toStringAsFixed(1),
+            style: AppText.labelMedium(
+              color: compact ? colors.text : colors.textSecondary,
+            ).copyWith(fontWeight: compact ? AppText.semiBold : null),
+          ),
+        ],
+      ],
+    );
+
     return Semantics(
       label: 'Rated ${rating.toStringAsFixed(1)} out of 5',
       excludeSemantics: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (compact)
-            Icon(Icons.star_rounded, size: size, color: colors.warning)
-          else
-            for (var star = 1; star <= 5; star++)
-              Icon(
-                halves >= star * 2
-                    ? Icons.star_rounded
-                    : halves == star * 2 - 1
-                    ? Icons.star_half_rounded
-                    : Icons.star_outline_rounded,
-                size: size,
-                color: colors.warning,
+      // The compact form is a small chip, like noon's rating badge.
+      child: compact
+          ? Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimens.space4 + Dimens.space2,
+                vertical: Dimens.space2,
               ),
-          if (showValue) ...[
-            SizedBox(width: compact ? Dimens.space2 : Dimens.space4),
-            Text(
-              rating.toStringAsFixed(1),
-              style: AppText.labelMedium(
-                color: compact ? colors.text : colors.textSecondary,
+              decoration: BoxDecoration(
+                color: colors.background,
+                borderRadius: BorderRadius.circular(Dimens.radiusSmall - 4),
+                border: Border.all(color: colors.border),
               ),
-            ),
-          ],
-        ],
-      ),
+              child: stars,
+            )
+          : stars,
     );
   }
 }

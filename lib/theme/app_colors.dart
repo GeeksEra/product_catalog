@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Design tokens for color, mirroring the BuddyBoss app palette.
+/// Design tokens for color. The palette follows noon.com: its yellow top bar,
+/// navy and slate text, blue links, green ratings and coral deal tags.
 ///
 /// Widgets read colors only through [AppColors.of] (or `context.colors`),
 /// never from raw hex values or `Colors.*`. The light and dark palettes live
@@ -22,6 +23,15 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.success,
     required this.error,
     required this.warning,
+    required this.brand,
+    required this.onBrand,
+    required this.header,
+    required this.onHeader,
+    required this.searchField,
+    required this.chipSelected,
+    required this.onChipSelected,
+    required this.sale,
+    required this.rating,
   });
 
   /// brand/primary: CTAs, links and active states only.
@@ -63,8 +73,35 @@ class AppColors extends ThemeExtension<AppColors> {
   /// status/error.
   final Color error;
 
-  /// status/warning. Also used for rating stars.
+  /// status/warning.
   final Color warning;
+
+  /// Brand yellow: the top bar in light mode, selected chips in dark mode.
+  final Color brand;
+
+  /// Text and icons on [brand].
+  final Color onBrand;
+
+  /// The large-title header and its search and chip rows.
+  final Color header;
+
+  /// Titles and icons on [header].
+  final Color onHeader;
+
+  /// The search field's fill inside the header.
+  final Color searchField;
+
+  /// A selected filter chip's fill.
+  final Color chipSelected;
+
+  /// A selected filter chip's label.
+  final Color onChipSelected;
+
+  /// Discount tags laid over product images.
+  final Color sale;
+
+  /// Rating stars.
+  final Color rating;
 
   /// The palette of the nearest [Theme].
   static AppColors of(BuildContext context) =>
@@ -86,6 +123,15 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? success,
     Color? error,
     Color? warning,
+    Color? brand,
+    Color? onBrand,
+    Color? header,
+    Color? onHeader,
+    Color? searchField,
+    Color? chipSelected,
+    Color? onChipSelected,
+    Color? sale,
+    Color? rating,
   }) {
     return AppColors(
       primary: primary ?? this.primary,
@@ -102,6 +148,15 @@ class AppColors extends ThemeExtension<AppColors> {
       success: success ?? this.success,
       error: error ?? this.error,
       warning: warning ?? this.warning,
+      brand: brand ?? this.brand,
+      onBrand: onBrand ?? this.onBrand,
+      header: header ?? this.header,
+      onHeader: onHeader ?? this.onHeader,
+      searchField: searchField ?? this.searchField,
+      chipSelected: chipSelected ?? this.chipSelected,
+      onChipSelected: onChipSelected ?? this.onChipSelected,
+      sale: sale ?? this.sale,
+      rating: rating ?? this.rating,
     );
   }
 
@@ -124,6 +179,15 @@ class AppColors extends ThemeExtension<AppColors> {
       success: mix(success, other.success),
       error: mix(error, other.error),
       warning: mix(warning, other.warning),
+      brand: mix(brand, other.brand),
+      onBrand: mix(onBrand, other.onBrand),
+      header: mix(header, other.header),
+      onHeader: mix(onHeader, other.onHeader),
+      searchField: mix(searchField, other.searchField),
+      chipSelected: mix(chipSelected, other.chipSelected),
+      onChipSelected: mix(onChipSelected, other.onChipSelected),
+      sale: mix(sale, other.sale),
+      rating: mix(rating, other.rating),
     );
   }
 }
