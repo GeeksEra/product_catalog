@@ -1,0 +1,56 @@
+name: product_catalog
+description: "Product catalog app on the DummyJSON API, built for the Best Practice Flutter Test."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cached_network_image: ^3.4.1
+  # Glyphs for CupertinoSearchTextField and the iOS refresh control.
+  cupertino_icons: ^1.0.9
+  flutter_mobx: ^2.3.0
+  get_it: ^9.3.0
+  http: ^1.6.0
+  # Pinned to v4: v5 replaced the PagingController listener API.
+  infinite_scroll_pagination: ^4.0.0
+  json_annotation: ^4.12.0
+  mobx: ^2.6.1
+  package_info_plus: ^10.2.1
+  qr_flutter: ^4.1.0
+  shared_preferences: ^2.5.5
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+  build_runner: ^2.15.1
+  flutter_lints: ^6.0.0
+  json_serializable: ^6.14.1
+  mobx_codegen: ^2.7.8
+  mocktail: ^1.0.5
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
