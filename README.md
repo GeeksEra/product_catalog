@@ -2,6 +2,18 @@
 
 A Flutter app that lists products from the [DummyJSON](https://dummyjson.com/docs/products) API and shows each one in detail. It was built for the Best Practice Flutter Test.
 
+## Download for Android
+
+Scan the code with your phone's camera, or tap the link on your phone, to download the APK.
+
+<a href="https://github.com/GeeksEra/product_catalog/raw/main/apk/product-catalog.apk"><img src="docs/apk-qr.svg" width="220" alt="QR code linking to the Android APK download"></a>
+
+**[Download product-catalog.apk](https://github.com/GeeksEra/product_catalog/raw/main/apk/product-catalog.apk)** (17 MB, version 1.0.0)
+
+- Needs Android 7.0 or later on a 64-bit ARM phone, which covers almost every phone from recent years.
+- The app isn't on Google Play, so Android asks you to allow installs from your browser or file manager the first time. Open the downloaded file and follow the prompt.
+- It's a release build signed with the Flutter debug key, which is fine for trying it out. An update signed with a different key would need the old version uninstalled first.
+
 ## Features
 
 **App shell**
@@ -76,6 +88,12 @@ Requirements: Flutter stable (built and tested with **Flutter 3.41.9 / Dart 3.11
 ```sh
 flutter pub get
 flutter run
+```
+
+To rebuild the downloadable APK and its QR code (`apk/product-catalog.apk` and `docs/apk-qr.svg`):
+
+```sh
+tool/build_apk.sh
 ```
 
 The generated `*.g.dart` files (MobX stores and JSON models) are committed, so no code generation is needed to run the app. If you change a model or store, regenerate them:
